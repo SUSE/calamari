@@ -133,6 +133,8 @@ install-common: install-conf install-venv install-salt install-alembic install-s
 install-rpm: build install-common install-rh-conf
 	@echo "target: $@"
 
+install-suse: build-unpacked install-conf install-salt install-alembic install-suse-webapp install-suse-conf
+
 # for deb
 install: build
 	@echo "target: $@"
@@ -197,6 +199,17 @@ install-rh-conf:
 	# httpd conf for graphite and calamari vhosts, redhat
 	@$(INSTALL) -D -m 0644 conf/httpd/$(FLAVOR)/calamari.conf \
 		$(DESTDIR)/etc/httpd/conf.d/calamari.conf
+
+install-suse-conf:
+	@echo "target: $@"
+	# httpd conf for graphite and calamari vhosts, suse
+	@$(INSTALL) -D -m 0644 conf/httpd/suse/calamari.conf \
+		$(DESTDIR)/etc/apache2/conf.d/calamari.conf
+
+install-suse-webapp:
+	@echo "target: $@"
+	$(INSTALL) -d -m 755 $(DESTDIR)/srv/www/calamari
+	cp -rp webapp/calamari $(DESTDIR)/srv/www/calamari
 
 install-venv:
 	@echo "target: $@"
