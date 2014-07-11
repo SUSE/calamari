@@ -18,6 +18,7 @@ import time
 from calamari_common.config import CalamariConfig, AlembicConfig
 from sqlalchemy import create_engine
 from calamari_common.db.base import Base
+import platform
 
 # Import sqlalchemy objects so that create_all sees them
 from cthulhu.persistence.sync_objects import SyncObject  # noqa
@@ -258,7 +259,10 @@ def initialize(args):
 
     # Signal supervisor to restart cthulhu as we have created its database
     log.info("Restarting services...")
-    subprocess.call(['supervisorctl', 'restart', 'cthulhu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if platform.dist()[0] == 'SuSE':
+        subprocess.call(['systemctl', 'restart', 'cthulhu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    else:
+        subprocess.call(['supervisorctl', 'restart', 'cthulhu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
     # TODO: optionally generate or install HTTPS certs + hand to apache
     log.info("Complete.")
