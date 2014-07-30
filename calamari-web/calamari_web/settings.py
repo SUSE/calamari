@@ -263,6 +263,7 @@ GRAPHITE_API_PREFIX = "/graphite"
 
 TEMPLATE_DIRS = (os.path.join(config.get('graphite', 'root'),
                               "lib/python2.{pyminor}/site-packages/graphite/templates".format(pyminor=sys.version_info[1])),
+                 "/usr/lib/python2.{pyminor}/site-packages/graphite/templates".format(pyminor=sys.version_info[1])
                  )
 CONTENT_DIR = os.path.join(config.get('graphite', 'root'), "webapp/content/")
 if graphite:
