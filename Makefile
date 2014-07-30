@@ -205,8 +205,6 @@ install-suse-conf:
 	# httpd conf for graphite and calamari vhosts, suse
 	@$(INSTALL) -D -m 0644 conf/httpd/suse/calamari.conf \
 		$(DESTDIR)/etc/apache2/conf.d/calamari.conf
-	@$(INSTALL) -D -m 0644 conf/calamari-carbon.service \
-		$(DESTDIR)/usr/lib/systemd/system/calamari-carbon.service
 	@$(INSTALL) -D -m 0644 conf/cthulhu.service \
 		$(DESTDIR)/usr/lib/systemd/system/cthulhu.service
 

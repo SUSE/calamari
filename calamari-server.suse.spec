@@ -48,6 +48,10 @@ Recommends:     calamari-clients
 %{?systemd_requires}
 BuildRequires:  apache2
 BuildRequires:  fdupes
+# For ownership of /etc/graphite
+BuildRequires:  graphite-web
+# For ownership of /etc/carbon
+BuildRequires:  python-carbon
 BuildRequires:  python-devel
 BuildRequires:  systemd
 # For lsb_release binary
@@ -72,9 +76,12 @@ echo "VERSION =\"%{version}\"" > rest-api/calamari_rest/version.py
 
 %install
 make DESTDIR=%{buildroot} install-suse
-mv %{buildroot}/%{_sysconfdir}/logrotate.d/calamari %{buildroot}/%{_sysconfdir}/logrotate.d/calamari-server
+mv %{buildroot}%{_sysconfdir}/logrotate.d/calamari %{buildroot}%{_sysconfdir}/logrotate.d/calamari-server
+mkdir -p %{buildroot}%{_sysconfdir}/carbon
+mv %{buildroot}%{_sysconfdir}/graphite/carbon.conf %{buildroot}%{_sysconfdir}/carbon/
+sed -i 's|^CONF_DIR.*|CONF_DIR = /etc/carbon/|' %{buildroot}%{_sysconfdir}/carbon/carbon.conf
+mv %{buildroot}%{_sysconfdir}/graphite/storage-schemas.conf %{buildroot}%{_sysconfdir}/carbon/
 mkdir -p %{buildroot}%{_sbindir}
-ln -s -f %{_sbindir}/service %{buildroot}%{_sbindir}/rccalamari-carbon
 ln -s -f %{_sbindir}/service %{buildroot}%{_sbindir}/rccthulhu
 %fdupes %{buildroot}%{python_sitelib}
 
@@ -88,7 +95,8 @@ to monitor and control a Ceph cluster via a web browser.
 /srv/www/calamari/
 %{python_sitelib}/*
 %attr (644,-,-) %config(noreplace) %{_sysconfdir}/salt/master.d/calamari.conf
-%config(noreplace) %{_sysconfdir}/graphite/
+%config(noreplace) %{_sysconfdir}/carbon/carbon.conf
+%config(noreplace) %{_sysconfdir}/carbon/storage-schemas.conf
 %attr (644,-,-) %config(noreplace) %{_sysconfdir}/logrotate.d/calamari-server
 %attr (644,-,-) %config(noreplace) %{_sysconfdir}/apache2/conf.d/calamari.conf
 %config(noreplace) %{_sysconfdir}/calamari/
@@ -96,24 +104,17 @@ to monitor and control a Ceph cluster via a web browser.
 %{_bindir}/cthulhu-manager
 %dir %{_localstatedir}/lib/calamari
 %dir %{_localstatedir}/lib/cthulhu
-# Unclear if these perms are needed on all subdirs
-%attr (-, wwwrun, www) %dir %{_localstatedir}/lib/graphite
-%dir %{_localstatedir}/lib/graphite/log
-%dir %{_localstatedir}/lib/graphite/log/webapp
+# unclear if we need www user for graphite/whisper
 %dir %{_localstatedir}/lib/graphite/whisper
 %attr (-, wwwrun, www) %dir %{_localstatedir}/log/calamari
-%attr (-, wwwrun, www) %dir %{_localstatedir}/log/graphite
 %{_unitdir}/*service
-%{_sbindir}/rccalamari-carbon
 %{_sbindir}/rccthulhu
 %exclude %{_sysconfdir}/supervisor
 
 %pre
-%service_add_pre calamari-carbon.service
 %service_add_pre cthulhu.service
 
 %post -n calamari-server
-%service_add_post calamari-carbon.service
 %service_add_post cthulhu.service
 
 if [ $1 -eq 1 ]; then
@@ -124,7 +125,7 @@ if [ $1 -eq 1 ]; then
 
 	systemctl restart salt-master || true
 
-	for service in calamari-carbon cthulhu apache2 ; do
+	for service in carbon-cache cthulhu apache2 ; do
 		systemctl enable $service || true
 		systemctl start $service || true
 	done
@@ -134,17 +135,15 @@ if [ $1 -eq 1 ]; then
 	echo "Please run 'sudo calamari-ctl initialize' to complete the installation."
 elif [ $1 -eq 2 ]; then
 	# This restarting might be overkill
-	for service in salt-master calamari-carbon cthulhu apache2 ; do
+	for service in salt-master carbon-cache cthulhu apache2 ; do
 		systemctl restart $service || true
 	done
 fi
 
 %preun -n calamari-server
-%service_del_preun calamari-carbon.service
 %service_del_preun cthulhu.service
 
 %postun -n calamari-server
-%service_del_postun calamari-carbon.service
 %service_del_postun cthulhu.service
 if [ $1 -eq 0 ] ; then
 	systemctl restart apache2 || true
