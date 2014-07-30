@@ -1,7 +1,7 @@
 [Unit]
 Description=Cthulhu Manager
-After=network.target calamari-carbon.service postgresql.service salt-master.service
-Requires=calamari-carbon.service postgresql.service salt-master.service
+After=network.target carbon-cache.service postgresql.service salt-master.service
+Requires=carbon-cache.service postgresql.service salt-master.service
 Before=apache2.service
 
 [Service]
