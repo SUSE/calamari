@@ -186,8 +186,11 @@ install-deb-conf:
 install-rh-conf:
 	@echo "target: $@"
 	# httpd conf for graphite and calamari vhosts, redhat
+	# add WSGISocketPrefix, see:
+	# http://code.google.com/p/modwsgi/wiki/ConfigurationDirectives#WSGISocketPrefix
 	@$(INSTALL) -D -m 0644 conf/httpd/$(FLAVOR)/calamari.conf \
 		$(DESTDIR)/etc/httpd/conf.d/calamari.conf
+	@sed -i '1iWSGISocketPrefix run/wsgi' $(DESTDIR)/etc/httpd/conf.d/calamari.conf
 
 install-venv:
 	@echo "target: $@"
