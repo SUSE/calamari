@@ -210,8 +210,10 @@ install-suse-conf:
 
 install-suse-webapp:
 	@echo "target: $@"
-	$(INSTALL) -d -m 755 $(DESTDIR)/srv/www/calamari
-	cp -rp webapp/calamari $(DESTDIR)/srv/www/calamari
+	$(INSTALL) -D -m 0755 webapp/calamari/manage.py \
+		$(DESTDIR)/srv/www/calamari/manage.py
+	$(INSTALL) -D -m 0644 conf/calamari.wsgi \
+		$(DESTDIR)/srv/www/calamari/calamari.wsgi
 
 install-venv:
 	@echo "target: $@"
