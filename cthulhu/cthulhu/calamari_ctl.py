@@ -38,7 +38,7 @@ buffer_handler.setFormatter(logging.Formatter(FORMAT))
 log.addHandler(buffer_handler)
 
 ALEMBIC_TABLE = 'alembic_version'
-POSTGRES_SLS = "/opt/calamari/salt-local/postgres.sls"
+POSTGRES_SLS = "/usr/share/calamari/salt/postgres.sls"
 
 
 @contextmanager
