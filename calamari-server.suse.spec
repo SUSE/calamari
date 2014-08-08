@@ -91,8 +91,7 @@ to monitor and control a Ceph cluster via a web browser.
 
 %files -n calamari-server
 %defattr(-,root,root,-)
-/opt/calamari/
-%exclude /opt/calamari/conf
+%exclude /opt/calamari
 /srv/www/calamari/
 %config /srv/pillar/*
 # taking ownership of /srv/reactor, as salt-master doesn't create/own this for some reason
