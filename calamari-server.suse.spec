@@ -94,6 +94,7 @@ to monitor and control a Ceph cluster via a web browser.
 /opt/calamari/
 %exclude /opt/calamari/conf
 /srv/www/calamari/
+%{_libexecdir}/calamari
 %{python_sitelib}/*
 %attr (644,-,-) %config(noreplace) %{_sysconfdir}/salt/master.d/calamari.conf
 %config(noreplace) %{_sysconfdir}/carbon/carbon.conf
