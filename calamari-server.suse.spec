@@ -94,6 +94,17 @@ to monitor and control a Ceph cluster via a web browser.
 /opt/calamari/
 %exclude /opt/calamari/conf
 /srv/www/calamari/
+%config /srv/pillar/*
+# taking ownership of /srv/reactor, as salt-master doesn't create/own this for some reason
+%dir /srv/reactor
+%config /srv/reactor/start.sls
+%config /srv/salt/diamond.sls
+%config /srv/salt/top.sls
+/srv/salt/_modules
+%dir /srv/salt/base
+%config(noreplace) /srv/salt/base/*conf
+/srv/salt/base/diamond-requirements.txt
+%{_datadir}/calamari
 %{_libexecdir}/calamari
 %{python_sitelib}/*
 %attr (644,-,-) %config(noreplace) %{_sysconfdir}/salt/master.d/calamari.conf

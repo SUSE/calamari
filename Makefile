@@ -179,10 +179,10 @@ install-conf: $(CONFFILES)
 
 install-salt:
 	@echo "target: $@"
-	@$(INSTALL) -d $(DESTDIR)/opt/calamari/salt
-	cp -rp salt/srv/* $(DESTDIR)/opt/calamari/salt/
-	@$(INSTALL) -d $(DESTDIR)/opt/calamari/salt-local
-	cp -rp salt/local/*.sls $(DESTDIR)/opt/calamari/salt-local
+	@$(INSTALL) -d $(DESTDIR)/srv
+	cp -rp salt/srv/* $(DESTDIR)/srv/
+	@$(INSTALL) -d $(DESTDIR)/usr/share/calamari/salt
+	cp -rp salt/local/*.sls $(DESTDIR)/usr/share/calamari/salt/
 
 install-alembic:
 	@echo "target: $@"
