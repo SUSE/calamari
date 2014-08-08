@@ -177,8 +177,8 @@ install-salt:
 
 install-alembic:
 	@echo "target: $@"
-	@$(INSTALL) -d $(DESTDIR)/opt/calamari/alembic
-	cp -rp alembic/* $(DESTDIR)/opt/calamari/alembic
+	@$(INSTALL) -d $(DESTDIR)/usr/lib/calamari/alembic
+	cp -rp alembic/* $(DESTDIR)/usr/lib/calamari/alembic
 
 install-deb-conf:
 	@echo "target: $@"
