@@ -195,9 +195,9 @@ install-rh-conf:
 
 install-suse-conf:
 	@echo "target: $@"
-	# httpd conf for graphite and calamari vhosts, suse
-	@$(INSTALL) -D -m 0644 conf/httpd/suse/calamari.conf \
+	@$(INSTALL) -D conf/httpd/calamari.conf \
 		$(DESTDIR)/etc/apache2/conf.d/calamari.conf
+	@sed -i '1iWSGISocketPrefix /var/run/wsgi' $(DESTDIR)/etc/apache2/conf.d/calamari.conf
 	@$(INSTALL) -D -m 0644 conf/cthulhu.service \
 		$(DESTDIR)/usr/lib/systemd/system/cthulhu.service
 
