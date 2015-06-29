@@ -1,5 +1,7 @@
 {% if grains['os_family'] == 'RedHat' %}
   {% set apache_service = 'httpd' %}
+{% elif grains['os_family'] == 'Suse' %}
+  {% set apache_service = 'apache2' %}
 {% else %}
   {% set apache_service = 'apache' %}
 {% endif %}
@@ -31,10 +33,12 @@ salt-master:
     - running
     - enable: True
 
+{% if grains['os_family'] != 'Suse' %}
 supervisord:
   service:
     - running
     - enable: True
+{% endif %}
 
 salt-master:
   service:
