@@ -26,6 +26,7 @@ from cthulhu.log import log
 import cthulhu.log
 from cthulhu.util import Ticker
 from cthulhu.manager.cluster_monitor import ClusterMonitor
+from cthulhu.manager.iscsi_monitor import ISCSIMonitor
 from cthulhu.manager.eventer import Eventer
 from cthulhu.manager.request_collection import RequestCollection
 from cthulhu.manager import request_collection
@@ -129,7 +130,14 @@ class TopLevelEvents(gevent.greenlet.Greenlet):
                 tag = ev['tag']
                 data = ev['data']
                 try:
-                    if tag.startswith("ceph/cluster/"):
+                    if tag.startswith("ceph/cluster/") and tag.endswith("iscsi"):
+                        iscsi_data = data['data']
+                        if not iscsi_data['fsid'] in self._manager.clusters:
+                            self._manager.on_iscsi_discovery(data['id'], iscsi_data)
+                        else:
+                            log.debug("%s: iscsidata from existing cluster %s" % (
+                                self.__class__.__name__, iscsi_data['fsid']))
+                    elif tag.startswith("ceph/cluster/"):
                         cluster_data = data['data']
                         if not cluster_data['fsid'] in self._manager.clusters:
                             self._manager.on_discovery(data['id'], cluster_data)
@@ -360,6 +368,22 @@ class Manager(object):
         # to do anything
         cluster_monitor.ready()
         cluster_monitor.on_heartbeat(minion_id, heartbeat_data)
+
+
+    def on_iscsi_discovery(self, minion_id, iscsi_data):
+        log.info("on_discovery: {0}/{1}".format(minion_id, iscsi_data['fsid']))
+        iscsi_monitor = ISCSIMonitor(iscsi_data['fsid'], iscsi_data['name'],
+                                         self.notifier, self.persister, self.servers, self.eventer, self.requests)
+        self.clusters[iscsi_data['fsid']] = iscsi_monitor
+
+        # Run before passing on the heartbeat, because otherwise the
+        # syncs resulting from the heartbeat might not be received
+        # by the monitor.
+        iscsi_monitor.start()
+        # Wait for ClusterMonitor to start accepting events before asking it
+        # to do anything
+        iscsi_monitor.ready()
+        iscsi_monitor.on_iscsidata(minion_id, iscsi_data)
 
 
 def dump_stacks():

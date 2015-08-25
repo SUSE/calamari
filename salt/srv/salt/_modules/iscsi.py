@@ -1,6 +1,7 @@
 import os
 import subprocess
 import json
+import ceph
 
 #This module contains functions which can be used to fetch ISCSI data from the ceph cluster
 #ISCSI data could be fetched either using lrbd's lrbd.conf object or using targetcli.
@@ -53,7 +54,7 @@ def get_lrbdconf_data(name=RADOS_NAME, clustername=CLUSTER_NAME, conffile=CONF_F
             continue
         finally:
             pool_ctx.close()
-
+    return_dict['fsid'] = cluster_handle.get_fsid()
     cluster_handle.shutdown() 
     return return_dict
         
@@ -124,7 +125,27 @@ def get_rtslib_data():
     return return_dict
 
 
+def get_iscsi_data():
+    fsid_names = {}
+    for filename in ceph.glob("/var/run/ceph/*.asok"):
+        try:
+            service_data = ceph.service_status(filename)
+        except (ceph.rados.Error, ceph.MonitoringError):
+            # Failed to get info for this service, stale socket or unresponsive,
+            # exclude it from report
+            pass
+        else:
+            if not service_data:
+                continue
 
+            fsid_names[service_data['fsid']] = service_data['cluster']
+
+    iscsi_data = {}
+    for fsid in fsid_names:
+        iscsi_data[fsid] = get_lrbdconf_data(name=RADOS_NAME, clustername=fsid_names[fsid], conffile='')
+
+    for fsid, iscsidata in iscsi_data.items():
+        ceph.fire_event(iscsidata, 'ceph/cluster/{0}/iscsi'.format(fsid))
 
 
 
