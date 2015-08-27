@@ -551,6 +551,43 @@ def service_status(socket_path):
     }
 
 
+def _get_lrbdconf_data(cluster_handle):
+    """
+    connect to the ceph cluster on the localhost using librados and iterate through all the
+    pools. In each pool look for the object 'lrbd.conf' and fetch the values of it's xattrs.
+    If no rados module is present, we can safely assume that ceph is not installed on this
+    node. If there is an error in cluster.connect(), then we do have ceph installed but this
+    node does not have client.admin key. A rados.ObjectNotFound error would mean that the
+    pool in question does not have the 'lrbd.conf' object and hence it does not have an ISCSI
+    deployed on any of it's RBD images.return_dict dictionary will be returned.
+    """
+    return_dict = {}
+
+    try:
+        cluster_handle.connect()
+    except:
+        return_dict['error'] = True
+        return_dict['status'] = "no client.admin key on this node"
+        return return_dict
+
+    pools = cluster_handle.list_pools()
+    for pool in pools:
+        pool_ctx = cluster_handle.open_ioctx(pool)
+        #return_dict[pool]
+        try:
+            lrbd_attrs = pool_ctx.get_xattrs('lrbd.conf')
+            return_dict[pool] = list(lrbd_attrs)
+        except (rados.ObjectNotFound):
+            return_dict[pool] = "No lrbd configured ISCSI target found for this pool"
+            pool_ctx.close()
+            continue
+        finally:
+            pool_ctx.close()
+    #return_dict['fsid'] = cluster_handle.get_fsid()
+    cluster_handle.shutdown()
+    return return_dict
+
+
 def cluster_status(cluster_handle, cluster_name):
     """
     Get a summary of the status of a ceph cluster, especially
@@ -579,6 +616,9 @@ def cluster_status(cluster_handle, cluster_name):
     # Get digest of configuration
     config_digest = md5(_get_config(cluster_name))
 
+    # Get digest for iscsidata from lrbd.conf objects
+    iscsi_digest = md5(_get_lrbdconf_data(cluster_handle))
+
     return {
         'name': cluster_name,
         'fsid': fsid,
@@ -589,7 +629,8 @@ def cluster_status(cluster_handle, cluster_name):
             'mds_map': mds_epoch,
             'pg_summary': pg_summary_digest,
             'health': health_digest,
-            'config': config_digest
+            'config': config_digest,
+            'iscsi': iscsi_digest
         }
     }
 

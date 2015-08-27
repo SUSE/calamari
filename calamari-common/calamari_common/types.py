@@ -255,6 +255,10 @@ class Config(SyncObject):
     str = 'config'
 
 
+class Iscsi(SyncObject):
+    str = 'iscsi'
+
+
 class NotFound(Exception):
     def __init__(self, object_type, object_id):
         self.object_type = object_type
@@ -279,9 +283,10 @@ CRUSH_NODE = 'crush_node'
 CRUSH_TYPE = 'crush_type'
 CLUSTER = 'cluster'
 SERVER = 'server'
+ISCSI = 'iscsi'
 
 # The objects that ClusterMonitor keeps copies of from the mon
-SYNC_OBJECT_TYPES = [MdsMap, OsdMap, MonMap, MonStatus, PgSummary, Health, Config]
+SYNC_OBJECT_TYPES = [MdsMap, OsdMap, MonMap, MonStatus, PgSummary, Health, Config, Iscsi]
 SYNC_OBJECT_STR_TYPE = dict((t.str, t) for t in SYNC_OBJECT_TYPES)
 
 USER_REQUEST_COMPLETE = 'complete'
