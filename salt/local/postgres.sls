@@ -88,7 +88,8 @@ calamaridb:
 
 {% endif %}
 
-{% elif grains['os_family'] == 'Suse' %}
+# For some reason os_family is "openSUSE Leap" on Leap, but just "Suse" on other distros...
+{% elif grains['os_family'] == 'Suse' or 'SUSE' in grains['os_family'] %}
 
 # Salt won't find the postgresql service unless systemd knows
 # it exists, which it won't unless the init script has been
