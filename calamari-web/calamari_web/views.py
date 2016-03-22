@@ -82,7 +82,8 @@ REDHAT7 = 'redhat7'
 PRECISE = 'precise'
 TRUSTY = 'trusty'
 WHEEZY = 'wheezy'
-DISTROS = [CENTOS, REDHAT6, REDHAT7, PRECISE, TRUSTY, WHEEZY]
+SUSE = 'suse'
+DISTROS = [CENTOS, REDHAT6, REDHAT7, PRECISE, TRUSTY, WHEEZY, SUSE]
 
 SUPPORT_MATRIX = "Inktank Ceph Enterprise supports RHEL 6.3, RHEL 6.4, CentOS 6.3, CentOS 6.4, " \
                  "Ubuntu 12.04/14.04 LTS, and Debian 7."
@@ -117,9 +118,15 @@ try:
     ps = subprocess.Popen(["lsb_release", "-d", "-s"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     ps_out, ps_err = ps.communicate()
 except OSError:
-    print "Error querying LSB version"
-    print SUPPORT_MATRIX
-    sys.exit(-1)
+    # Fake lsb_release for SUSE in case lsb_release binary isn't installed
+    if os.path.isfile("/etc/SuSE-release"):
+        lsb_release = "SUSE"
+    elif os.path.isfile("/etc/os-release") and "SUSE" in open("/etc/os-release").read():
+        lsb_release = "SUSE"
+    else:
+        print "Error querying LSB version"
+        print SUPPORT_MATRIX
+        sys.exit(-1)
 else:
     lsb_release = ps_out.strip(" \\"")
 
@@ -135,6 +142,9 @@ elif lsb_release.startswith("Ubuntu 14.04"):
     distro = TRUSTY
 elif lsb_release.startswith("Debian GNU/Linux 7."):
     distro = WHEEZY
+elif lsb_release.find("SUSE") >= 0:
+    # Could be "openSUSE", "SUSE Linux Enterprise", etc.
+    distro = SUSE
 else:
     print "Unsupported distribution '%s'" % lsb_release
     print SUPPORT_MATRIX
@@ -156,6 +166,9 @@ elif distro in [PRECISE, TRUSTY]:
     open("/etc/apt/sources.list.d/calamari.list", 'w').write("deb [arch=amd64] {base_url}static/{{tag}} {{tag}} main".format(tag=tag))
 elif distro == WHEEZY:
     open("/etc/apt/sources.list.d/calamari.list", 'w').write("deb [arch=amd64] {base_url}static/debian wheezy  main")
+elif distro == SUSE:
+    # Expect the user to have set up software repos appropriately already
+    pass
 else:
     # Should never happen
     raise NotImplementedError()
@@ -178,6 +191,10 @@ if distro in [CENTOS, REDHAT6, REDHAT7]:
     subprocess.check_call(["yum", "install", "-y", SALT_PACKAGE])
     subprocess.check_call(["chkconfig", "salt-minion", "on"])
     subprocess.check_call(["service", "salt-minion", "start"])
+elif distro == SUSE:
+    subprocess.check_call(["zypper", "--non-interactive", "--quiet", "install", SALT_PACKAGE])
+    subprocess.check_call(["systemctl", "enable", "salt-minion"])
+    subprocess.check_call(["systemctl", "start", "salt-minion"])
 else:
     subprocess.check_call(["apt-get", "update"])
     subprocess.check_call(["apt-get", "install", "-y", "--force-yes", SALT_PACKAGE])

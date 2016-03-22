@@ -24,7 +24,7 @@ build: version build-venv
 build-unpacked: version
 	# similar to the set in build-venv-reqs, but installs to the global
 	# python site dir, not inside the venv
-	for p in calamari-common rest-api calamari-web cthulhu ; do \
+	for p in calamari-common rest-api calamari-web cthulhu minion-sim ; do \
 		cd $$p ; \
 		python setup.py install --prefix=/usr --root=$(DESTDIR) ; \
 		cd .. ; \

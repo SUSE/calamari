@@ -282,6 +282,7 @@ class ExternalCephControl(CephControl):
                                      cluster=self.cluster_name))
 
     def _check_pgs_active_and_clean(self, output):
+        log.info('pg_stat is "{o}"'.format(o=output))
         total_stat, pg_stat = output.replace(';', ':').split(':')[1:3]
         return 'active+clean' == pg_stat.split()[1] and total_stat.split()[0] == pg_stat.split()[0]
 

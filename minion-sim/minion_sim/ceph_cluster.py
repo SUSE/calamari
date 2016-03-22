@@ -1202,7 +1202,7 @@ class CephCluster(CephClusterState):
         pgs_brief = self._objects['pg_brief']
 
         # Load up our salt module to avoid replicating its processing
-        salt_module = os.path.join(os.path.dirname(os.path.abspath(__file__)), "../../salt/srv/salt/_modules")
+        salt_module = os.path.join(os.path.dirname(os.path.abspath(__file__)), "/srv/salt/_modules")
         sys.path.insert(0, salt_module)
         import ceph
         sys.path = sys.path[1:]

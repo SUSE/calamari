@@ -584,6 +584,7 @@ Provides metadata about the installation of Calamari server in use
         bootstrap_url = "{0}://{1}{2}".format(proto, request.META['HTTP_HOST'], reverse('bootstrap'))
         BOOTSTRAP_UBUNTU = "wget -O - {url} | sudo python"
         BOOTSTRAP_RHEL = "curl {url} | sudo python"
+        BOOTSTRAP_SUSE = "curl {url} | sudo python"
 
         return Response(self.serializer_class(DataObject({
             "version": str(VERSION),
@@ -595,6 +596,7 @@ Provides metadata about the installation of Calamari server in use
             "bootstrap_url": bootstrap_url,
             "bootstrap_ubuntu": BOOTSTRAP_UBUNTU.format(url=bootstrap_url),
             "bootstrap_rhel": BOOTSTRAP_RHEL.format(url=bootstrap_url),
+            "bootstrap_suse": BOOTSTRAP_SUSE.format(url=bootstrap_url),
         })).data)
 
 

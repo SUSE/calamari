@@ -12,6 +12,8 @@ setup(
               'calamari_rest.renderers',
               'calamari_rest.parsers',
               'calamari_rest.permissions',
+              'calamari_rest.management',
+              'calamari_rest.management.commands'
               ],
     url="http://www.inktank.com/enterprise/",
     author="Inktank Storage Inc.",
