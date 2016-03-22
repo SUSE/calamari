@@ -266,7 +266,13 @@ def initialize(args):
     # Signal supervisor to restart cthulhu as we have created its database
     log.info("Restarting services...")
     if platform.dist()[0] == 'SuSE':
+        # postgresq reload should already be covered by salt; doing this out
+        # of paranoia.
+        subprocess.call(['systemctl', 'reload', 'postgresql'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         subprocess.call(['systemctl', 'restart', 'cthulhu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # For apache, salt only ensures service is running, it doesn't reload
+        # it if already active, so we do need to kick this one...
+        subprocess.call(['systemctl', 'reload', 'apache2'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     else:
         subprocess.call(['supervisorctl', 'restart', 'cthulhu'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
