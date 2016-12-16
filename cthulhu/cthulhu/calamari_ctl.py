@@ -257,6 +257,11 @@ def initialize(args):
     if config.get('calamari_web', 'db_engine').endswith("sqlite3"):
         os.chown(config.get('calamari_web', 'db_name'), apache_user.pw_uid, apache_user.pw_gid)
 
+    # Also need to fix django secret key ownership and perms
+    # (bad to have it world-readable)
+    os.chown(config.get('calamari_web', 'secret_key_path'), apache_user.pw_uid, apache_user.pw_gid)
+    os.chmod(config.get('calamari_web', 'secret_key_path'), 0640)
+
     # Start services, configure to run on boot
     run_local_salt(sls=SERVICES_SLS, message='services')
 
