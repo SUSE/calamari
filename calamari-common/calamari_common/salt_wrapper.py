@@ -49,7 +49,7 @@ class SaltEventSource(object):
     """
 
     # Not a logical timeout, just how long we stick inside a get_event call
-    POLL_TIMEOUT = 5
+    POLL_TIMEOUT = 1
 
     # After this long without messages, close and reopen out connection to
     # salt-master.  Don't want to do this gratuitously because it can drop

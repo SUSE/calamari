@@ -3,6 +3,7 @@ import re
 import datetime
 
 from pytz import utc
+import gevent
 import gevent.greenlet
 import gevent.event
 
@@ -226,6 +227,7 @@ class ClusterMonitor(gevent.greenlet.Greenlet):
         event = SaltEventSource(log, salt_config)
 
         while not self._complete.is_set():
+            gevent.idle()
             # No salt tag filtering: https://github.com/saltstack/salt/issues/11582
             ev = event.get_event(full=True)
 

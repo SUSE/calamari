@@ -10,6 +10,7 @@ import traceback
 import resource
 import sys
 
+import gevent
 import gevent.event
 import gevent.socket as socket
 import greenlet
@@ -123,6 +124,7 @@ class TopLevelEvents(gevent.greenlet.Greenlet):
 
         event = SaltEventSource(log, salt_config)
         while not self._complete.is_set():
+            gevent.idle()
             # No salt tag filtering: https://github.com/saltstack/salt/issues/11582
             ev = event.get_event(full=True)
             if ev is not None and 'tag' in ev:

@@ -10,6 +10,7 @@ import datetime
 from dateutil import tz
 import logging
 
+import gevent
 from gevent import greenlet
 from gevent import event
 
@@ -147,6 +148,7 @@ class ServerMonitor(greenlet.Greenlet):
         subscription = SaltEventSource(log, salt_config)
 
         while not self._complete.is_set():
+            gevent.idle()
             # No salt tag filtering: https://github.com/saltstack/salt/issues/11582
             ev = subscription.get_event(full=True)
 
